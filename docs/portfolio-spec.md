@@ -1,0 +1,8 @@
+# Professional portfolio
+Draft. No deployment until owner review.
+English default, Spanish alternative; responsive and accessible. Separate degree from non-degree training. Public content only: approved career summary, education, credential titles and approved verification URLs, selected public projects. No private employer material, private course notes, tokens, email addresses or Notion identifiers in public repository.
+## Approval
+Notion status Terminado triggers a request regardless of category. Separate Publicación web status: Sin revisar, Pendiente de respuesta, Aprobada, Rechazada, Destacada. Empty is unreviewed. Existing LinkedIn / Portfolio checkbox is not consent for the website. Initial historical records need a separate owner review.
+Use a private execution environment for Gmail and Notion integration. Persist baseline of completed page IDs and request/thread IDs privately. Only send for new transitions after activation; use idempotency and retry reconciliation. Accept exact SI/SÍ, NO, DESTACAR from authenticated owner's sent mail in matching thread after request; ignore quoted text, ambiguous replies, inbound spoofing and unrelated messages. Re-read source record and approval before exporting. Export allowlisted public fields only; omit private notes and non-public links. Revocation removes item from published snapshot (public Git history may persist). No LinkedIn writes.
+## Deployment gate
+Test with mock records, then one owner-approved real request and response. Verify no duplicate messages, no unapproved exports, failure recovery, revocation and public site smoke checks. Keep deployment disabled until review. No costs without approval.
