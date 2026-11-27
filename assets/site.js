@@ -11,7 +11,23 @@ const featured=records.filter(x=>[0,1,2,4,6].includes(x.i));
 const dateLabel=r=>new Intl.DateTimeFormat(lang==="es"?"es-ES":"en-GB",{month:"long",year:"numeric",timeZone:"UTC"}).format(new Date(r.date+"-01T12:00:00Z"));
 const catLabel=r=>t(r.category,tr[r.category]);
 const node=(tag,cls,txt)=>{const e=document.createElement(tag);if(cls)e.className=cls;if(txt!==undefined)e.textContent=txt;return e};
-const mark=r=>{const e=node("span","institution-mark "+r.mark);e.setAttribute("aria-hidden","true");return e};
+
+const logoSources={"mark-0":"https://igat.icao.int/ated/TrainingCatalogue/GetTrainingInstitutionLogo/1322","mark-1":"https://keystoneacademic-res.cloudinary.com/image/upload/element/24/243331_UCI24_Div_Cont_Ed_2L-blue.png","mark-2":"https://upload.wikimedia.org/wikipedia/commons/5/51/LSE_Logo.svg","mark-3":"https://fonts.gstatic.com/s/i/productlogos/googleg/v6/24px.svg","mark-4":"https://img-c.udemycdn.com/user/200_H/182283936_f234_3.jpg","mark-5":"https://images.credly.com/images/6148e91e-effa-4b9a-9f25-2b88e1566e9b/blob","mark-6":"https://www.cambridgenetwork.co.uk/sites/default/files/styles/article_main/public/Untitled%20design%20-%202025-11-13T153234.174_1.png?itok=HeoAz9YK","mark-7":"https://www.eurocontrol.int/sites/default/files/2023-07/ec-logo-default.svg","mark-8":"https://media.licdn.com/dms/image/v2/D4D0BAQHgVXe3QbLuXQ/company-logo_200_200/B4DZvGfyNQJwAI-/0/1768561780409/gnss_academy_logo?e=2147483647&t=CYzxNoRhdNZFCTyogrKEExNpxe9RYzwJxrpXmygpI8o&v=beta","mark-9":"https://cdn.builder.io/api/v1/image/assets%2F6a96e08774184353b3aa88032e406411%2Fbd51e370ecda496498d96c17e3a31034?format=webp","mark-10":"https://miro.medium.com/v2/resize%3Afit%3A1080/1%2A1KIxFZKBUDmj4R5wTytfPg.png","mark-11":"https://upload.wikimedia.org/wikipedia/commons/0/05/Dassault_systemes_logo.svg","mark-12":"https://media.licdn.com/dms/image/v2/C4E0BAQHW3YmiGIOqDA/company-logo_200_200/company-logo_200_200/0/1654605057590/cithe_logo?e=2147483647&t=KFjoUJiChYeTJ81y3prReEMuzIZLnuT2gwU83HuASNQ&v=beta"};
+function enhanceLogo(el){
+  const key=[...el.classList].find(s=>s.startsWith("mark-")),src=logoSources[key];
+  if(!src||el.dataset.logoSource===src)return;
+  el.dataset.logoSource=src;el.classList.remove("logo-loaded");el.replaceChildren();
+  const img=node("img","institution-image");img.alt="";img.decoding="async";img.referrerPolicy="no-referrer";
+  img.addEventListener("load",()=>{if(el.dataset.logoSource!==src||img.parentElement!==el)return;const vector=/\.svg(?:\?|$)/i.test(src);if(vector||Math.max(img.naturalWidth,img.naturalHeight)>=144){el.classList.add("logo-loaded")}else{img.remove()}});
+  img.addEventListener("error",()=>{if(el.dataset.logoSource===src&&img.parentElement===el){el.classList.remove("logo-loaded");img.remove()}});
+  el.append(img);img.src=src;
+}
+for(const el of document.querySelectorAll(".institution-mark"))enhanceLogo(el);
+for(const img of document.querySelectorAll(".company-mark img")){
+  const fail=()=>{if(img.dataset.fallback){const next=img.dataset.fallback;delete img.dataset.fallback;img.src=next;return}img.hidden=true;img.parentElement.classList.add("company-logo-unavailable")};
+  img.addEventListener("error",fail);if(img.complete&&!img.naturalWidth)fail();
+}
+const mark=r=>{const e=node("span","institution-mark "+r.mark);e.setAttribute("aria-hidden","true");enhanceLogo(e);return e};
 const button=(txt,fn,cls)=>{const b=node("button",cls,txt);b.type="button";b.addEventListener("click",fn);return b};
 const link=(txt,url,cls)=>{const a=node("a",cls,txt);a.href=url;a.target="_blank";a.rel="noopener noreferrer";return a};
 const linkedin="https://www.linkedin.com/in/sara-pascual-pascual/details/certifications/";
@@ -34,7 +50,7 @@ for(const b of document.querySelectorAll("[data-institution]"))b.addEventListene
 const rail=$("institution-rail");$("rail-prev").addEventListener("click",()=>rail.scrollBy({left:-Math.max(150,rail.clientWidth*.75),behavior:motion.matches?"instant":"smooth"}));$("rail-next").addEventListener("click",()=>rail.scrollBy({left:Math.max(150,rail.clientWidth*.75),behavior:motion.matches?"instant":"smooth"}));
 $("rail-controls").hidden=false;$("view-controls").hidden=false;$("view-grid").addEventListener("click",()=>setView(false));$("view-list").addEventListener("click",()=>setView(true));
 const motion=matchMedia("(prefers-reduced-motion: reduce)");auto=!motion.matches;
-function renderSpot(animate=false){const r=featured[spotIndex];$("spot-mark").className="institution-mark "+r.mark;$("spot-provider").textContent=r.provider;$("spot-title").textContent=r.title;$("spot-date").textContent=dateLabel(r);$("spot-position").textContent=(spotIndex+1)+" / "+featured.length;for(const [i,b] of [...$("spot-dots").children].entries()){b.setAttribute("aria-current",String(i===spotIndex));b.setAttribute("aria-label",t("Show credential ","Mostrar credencial ")+(i+1))}if(animate&&!motion.matches){const e=$("spot-open");e.classList.remove("swap");void e.offsetWidth;e.classList.add("swap")}}
+function renderSpot(animate=false){const r=featured[spotIndex];const spotMark=$("spot-mark");spotMark.className="institution-mark "+r.mark;delete spotMark.dataset.logoSource;enhanceLogo(spotMark);$("spot-provider").textContent=r.provider;$("spot-title").textContent=r.title;$("spot-date").textContent=dateLabel(r);$("spot-position").textContent=(spotIndex+1)+" / "+featured.length;for(const [i,b] of [...$("spot-dots").children].entries()){b.setAttribute("aria-current",String(i===spotIndex));b.setAttribute("aria-label",t("Show credential ","Mostrar credencial ")+(i+1))}if(animate&&!motion.matches){const e=$("spot-open");e.classList.remove("swap");void e.offsetWidth;e.classList.add("swap")}}
 function updateTimer(){clearInterval(timer);timer=null;if(auto&&!hovering&&!focused&&!dialog.open&&!$("skill-dialog").open&&!document.hidden&&!motion.matches&&!$("education-view").hidden)timer=setInterval(()=>step(1,false),7000)}
 function step(n,manual=true){spotIndex=(spotIndex+n+featured.length)%featured.length;renderSpot(true);if(manual)updateTimer()}
 for(let i=0;i<featured.length;i++)$("spot-dots").append(button("",()=>{spotIndex=i;renderSpot(true);updateTimer()}));
