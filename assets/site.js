@@ -82,9 +82,11 @@ const roles=[...document.querySelectorAll(".career-card")],expand=$("expand-role
 function updateExpand(){const all=roles.every(x=>x.open);expand.dataset.en=all?"Collapse all":"Expand all";expand.dataset.es=all?"Contraer todo":"Expandir todo";expand.textContent=expand.dataset[lang];expand.setAttribute("aria-expanded",String(all))}
 expand.hidden=false;expand.addEventListener("click",()=>{const open=!roles.every(x=>x.open);roles.forEach(x=>x.open=open);updateExpand()});for(const role of roles)role.addEventListener("toggle",updateExpand);updateExpand();
 let progressPending=false;
-function updateProgress(){progressPending=false;updateNavigation();const max=document.documentElement.scrollHeight-window.innerHeight;const fraction=max>0?Math.max(0,Math.min(1,window.scrollY/max)):0;$("reading-fill").style.transform="scaleX("+fraction+")"}
+const railLinks=[...document.querySelectorAll("[data-rail]")];const railSections=railLinks.map(a=>({a,target:$(a.dataset.rail)}));let railActive=null;
+function updateRail(fraction){let current=railSections[0];const line=Math.min(180,window.innerHeight*.28);for(const item of railSections){if(item.target.getBoundingClientRect().top<=line)current=item}if(fraction>=.997&&fraction>0)current=railSections.at(-1);if(railActive!==current){railActive=current;for(const item of railSections){if(item===current)item.a.setAttribute("aria-current","location");else item.a.removeAttribute("aria-current")}}$("rail-current").textContent=current.a.querySelector(".rail-label").textContent;$("rail-progress-fill").style.width=(fraction*100)+"%"}
+function updateProgress(){progressPending=false;updateNavigation();const max=document.documentElement.scrollHeight-window.innerHeight;const fraction=max>0?Math.max(0,Math.min(1,window.scrollY/max)):0;$("reading-fill").style.transform="scaleX("+fraction+")";updateRail(fraction)}
 function queueProgress(){if(!progressPending){progressPending=true;requestAnimationFrame(updateProgress)}}
-window.addEventListener("scroll",queueProgress,{passive:true});window.addEventListener("resize",()=>{fitName();queueProgress()});document.fonts?.ready.then(fitName);fitName();updateProgress();
+window.addEventListener("scroll",queueProgress,{passive:true});window.addEventListener("resize",()=>{fitName();queueProgress()});document.fonts?.ready.then(fitName);fitName();updateProgress();$("language").addEventListener("click",queueProgress);for(const item of railSections)item.a.addEventListener("click",queueProgress);if("ResizeObserver" in window){const railResize=new ResizeObserver(queueProgress);railResize.observe(document.querySelector("main"))}
 
 // Replay reveals each time content re-enters the viewport, in either direction.
 if("IntersectionObserver" in window){

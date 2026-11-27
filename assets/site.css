@@ -79,3 +79,35 @@ header .brand{min-width:0;max-width:100%}.portfolio-nav{min-width:0;flex-wrap:wr
 .institution-mark.logo-loaded .institution-image{display:block}
 .institution-grid button{grid-template-rows:80px minmax(32px,auto);min-height:146px}.institution-grid .institution-mark{width:112px;max-width:100%;height:76px}.institution-grid .institution-mark::before{width:64px;height:64px;max-width:100%;max-height:100%}.spot-card .institution-mark{width:74px;height:74px}.credential-heading .institution-mark{width:60px;height:52px}.dialog-detail .institution-mark,.dialog-institution>.institution-mark{width:112px;height:84px}.dialog-list button .institution-mark,.skill-connection .institution-mark{width:52px;height:44px}.company-mark{flex-shrink:0;overflow:hidden}.company-mark img{width:100%;height:100%;max-width:100%;max-height:100%;object-fit:contain;object-position:center;image-rendering:auto;filter:none;border-radius:0}.company-logo-unavailable{visibility:hidden}.company-mark img[hidden]{display:none!important}
 @media(max-width:760px){.institution-grid button{grid-template-rows:66px minmax(32px,auto);min-height:128px}.institution-grid .institution-mark{width:96px;height:64px}.spot-card .institution-mark{width:53px;height:53px}.credential-heading .institution-mark{width:52px;height:46px}.dialog-detail .institution-mark,.dialog-institution>.institution-mark{width:96px;height:76px}}
+
+/* Keep every logo inside its full, explicitly sized image slot.
+   Absolute sizing bypasses the intrinsic grid track size of square raster images. */
+.company-mark,.institution-mark{position:relative;display:block;min-width:0;min-height:0;overflow:visible;flex-shrink:0;box-sizing:border-box}
+.company-mark img,.institution-mark .institution-image{position:absolute;inset:3px;display:block;width:calc(100% - 6px);height:calc(100% - 6px);min-width:0;min-height:0;max-width:none;max-height:none;object-fit:contain;object-position:center;margin:0;padding:0;border:0;border-radius:0;aspect-ratio:auto}
+.institution-mark:not(.logo-loaded) .institution-image,.company-mark img[hidden]{display:none!important}
+.institution-mark::before{inset:0;width:min(100%,64px);height:auto;aspect-ratio:1;max-height:100%;margin:auto}
+.company-mark{width:82px;height:66px;flex:0 0 82px;background:transparent}
+@media(max-width:760px){.company-mark{width:58px;height:54px;flex-basis:58px}}
+@media(max-width:420px){.company-mark{width:48px;height:48px;flex-basis:48px}}
+/* Reserved layout column: the reading index never floats on top of the content. */
+body{overflow-x:clip}
+.page-layout{max-width:1540px;margin:0 auto;padding-inline:clamp(18px,3vw,42px);display:grid;grid-template-columns:minmax(0,1fr) 178px;gap:26px;align-items:start}
+.page-layout>main{grid-column:1;grid-row:1;width:100%;min-width:0;max-width:none;padding-inline:0;margin:0}
+.section-rail{grid-column:2;grid-row:1;position:sticky;top:24px;align-self:start;margin-top:24px;min-width:0;max-height:calc(100dvh - 48px);overflow:auto;scrollbar-width:thin}
+.section-index-nav{padding:12px 0 10px 12px;border-left:1px solid var(--line);min-width:0}
+.rail-title{font-size:.61rem;font-weight:600;letter-spacing:.13em;color:var(--muted);margin:0 0 10px}
+.rail-progress{height:3px;border-radius:4px;background:var(--line);overflow:hidden;margin:0 9px 16px 0}.rail-progress span{display:block;height:100%;width:0;background:#9c8172;transform-origin:left}
+.rail-links{display:grid;gap:3px}.rail-links a{display:flex;align-items:center;gap:8px;min-width:0;padding:8px 7px;border-radius:7px;line-height:1.35;color:var(--muted);font-size:.72rem}
+.rail-links a:hover{background:#f0e9e3}.rail-links a[aria-current=location]{background:#eae0d7;color:var(--ink);font-weight:600}
+.rail-number{font-size:.61rem;color:var(--accent);font-variant-numeric:tabular-nums;flex:none}.rail-label{min-width:0;overflow-wrap:anywhere}
+.rail-current{display:none}
+@media(max-width:1199px) and (min-width:600px){
+.page-layout{grid-template-columns:minmax(0,1fr) 38px;gap:12px;padding-inline:clamp(14px,2.5vw,25px)}
+.section-index-nav{padding:10px 0 8px 5px}.rail-title{font-size:0;margin:0}.rail-progress{margin:0 2px 8px 0}.rail-links a{justify-content:center;padding:10px 2px;position:relative}.rail-number{font-size:.71rem}.rail-label{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}.rail-links a[aria-current=location]{box-shadow:inset -2px 0 var(--accent)}
+}
+@media(max-width:599px){
+.page-layout{display:flex;flex-direction:column;gap:0;padding-inline:14px}
+.section-rail{position:sticky;top:0;z-index:8;align-self:stretch;margin-top:0;max-height:none;overflow:visible;background:var(--bg);border-bottom:1px solid var(--line)}
+.section-index-nav{border:0;padding:8px 0 6px}.rail-title{display:none}.rail-progress{margin:0 0 5px;height:2px}.rail-links{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:3px}.rail-links a{position:relative;justify-content:center;padding:7px 2px}.rail-label{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}.rail-current{display:block;margin:4px 0 0;font-size:.66rem;font-weight:600;text-align:center;color:var(--ink)}html{scroll-padding-top:88px}
+}
+@media(prefers-reduced-motion:reduce){.rail-links a{transition:none}}
