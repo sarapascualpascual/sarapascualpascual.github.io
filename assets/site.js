@@ -45,21 +45,23 @@ function refresh(){document.documentElement.lang=lang;for(const el of document.q
 search.addEventListener("input",filter);category.addEventListener("change",filter);year.addEventListener("change",filter);more.addEventListener("click",()=>{expanded=!expanded;filter()});$("reset").addEventListener("click",()=>{search.value="";category.value="";year.value="";expanded=false;filter()});$("language").addEventListener("click",()=>{lang=t("es","en");try{localStorage.setItem("portfolio-language",lang)}catch{}refresh()});try{if(localStorage.getItem("portfolio-language")==="es")lang="es"}catch{}
 $("total").textContent=records.length;$("institution-total").textContent=new Set(records.map(r=>r.provider)).size+1;$("area-total").textContent=new Set(records.map(r=>r.category)).size;$("spotlight").hidden=false;refresh();updateTimer();
 
-const panels={education:$("education-view"),experience:$("experience"),projects:$("projects")};
-const viewLinks=[...document.querySelectorAll("[data-view]")];
-let activeView=null;const chapterLinks=[...document.querySelectorAll(".chapter-nav a")];const chapters=chapterLinks.map(a=>({a,section:document.querySelector(a.hash)}));const heroName=document.querySelector(".hero h1");function fitName(){if(!heroName||panels.education.hidden)return;heroName.style.removeProperty("font-size");const available=heroName.clientWidth,needed=heroName.scrollWidth;if(available>0&&needed>available+1){const size=parseFloat(getComputedStyle(heroName).fontSize);heroName.style.fontSize=Math.floor(size*available/needed*0.99*10)/10+"px"}}function updateChapters(){let current=null;if(!panels.education.hidden){const line=(document.querySelector("header")?.getBoundingClientRect().height||70)+(document.querySelector(".chapter-nav")?.getBoundingClientRect().height||0)+38;for(const c of chapters)if(c.section&&c.section.getBoundingClientRect().top<=line)current=c.a;}for(const c of chapters){if(c.a===current)c.a.setAttribute("aria-current","location");else c.a.removeAttribute("aria-current")}}
-function route(){const hash=location.hash.slice(1);const key=hash==="experience"||hash==="projects"?hash:"education";const changed=activeView!==key;activeView=key;for(const [k,p] of Object.entries(panels))p.hidden=k!==key;for(const a of viewLinks){if(a.dataset.view===key)a.setAttribute("aria-current","page");else a.removeAttribute("aria-current")}if(changed){const p=panels[key];p.classList.remove("enter-view");if(!motion.matches){void p.offsetWidth;p.classList.add("enter-view")}if(!["credentials","institutions","learning-areas"].includes(hash))window.scrollTo({top:0,behavior:"instant"})}updateTimer();requestAnimationFrame(()=>{fitName();updateProgress()})}
-window.addEventListener("hashchange",route);
-for(const a of viewLinks)a.addEventListener("click",()=>{if(location.hash===a.hash){route();window.scrollTo({top:0,behavior:motion.matches?"instant":"smooth"})}});
+// One document, with credentials before experience and projects.
+const navLinks=[...document.querySelectorAll("[data-section]")];
+const navSections={education:$("education-view"),experience:$("experience"),projects:$("projects")};
+const heroName=document.querySelector(".hero h1");
+function fitName(){if(!heroName)return;heroName.style.removeProperty("font-size");const available=heroName.clientWidth,needed=heroName.scrollWidth;if(available>0&&needed>available+1){const size=parseFloat(getComputedStyle(heroName).fontSize);heroName.style.fontSize=Math.max(10,Math.floor(size*available/needed*.99*10)/10)+"px"}}
+function updateNavigation(){let key="education";const line=window.innerHeight*.32;for(const k of ["experience","projects"]){if(navSections[k].getBoundingClientRect().top<=line)key=k}for(const link of navLinks){if(link.dataset.section===key)link.setAttribute("aria-current","location");else link.removeAttribute("aria-current")}}
 const roles=[...document.querySelectorAll(".career-card")],expand=$("expand-roles");
 function updateExpand(){const all=roles.every(x=>x.open);expand.dataset.en=all?"Collapse all":"Expand all";expand.dataset.es=all?"Contraer todo":"Expandir todo";expand.textContent=expand.dataset[lang];expand.setAttribute("aria-expanded",String(all))}
 expand.hidden=false;expand.addEventListener("click",()=>{const open=!roles.every(x=>x.open);roles.forEach(x=>x.open=open);updateExpand()});for(const role of roles)role.addEventListener("toggle",updateExpand);updateExpand();
-let progressPending=false;function updateProgress(){progressPending=false;updateChapters();const max=document.documentElement.scrollHeight-window.innerHeight;const fraction=max>0?Math.max(0,Math.min(1,window.scrollY/max)):0;$("reading-fill").style.transform="scaleX("+fraction+")";if(!motion.matches&&!panels.education.hidden){document.documentElement.style.setProperty("--orbit-shift",Math.min(90,Math.max(0,window.scrollY*.14))+"px");document.documentElement.style.setProperty("--orbit-turn",Math.min(12,Math.max(0,window.scrollY*.018))+"deg")}else{document.documentElement.style.setProperty("--orbit-shift","0px");document.documentElement.style.setProperty("--orbit-turn","0deg")}}
-function queueProgress(){if(!progressPending){progressPending=true;requestAnimationFrame(updateProgress)}}window.addEventListener("scroll",queueProgress,{passive:true});window.addEventListener("resize",()=>{fitName();queueProgress()});document.fonts?.ready.then(fitName);motion.addEventListener?.("change",queueProgress);route();
+let progressPending=false;
+function updateProgress(){progressPending=false;updateNavigation();const max=document.documentElement.scrollHeight-window.innerHeight;const fraction=max>0?Math.max(0,Math.min(1,window.scrollY/max)):0;$("reading-fill").style.transform="scaleX("+fraction+")"}
+function queueProgress(){if(!progressPending){progressPending=true;requestAnimationFrame(updateProgress)}}
+window.addEventListener("scroll",queueProgress,{passive:true});window.addEventListener("resize",()=>{fitName();queueProgress()});document.fonts?.ready.then(fitName);fitName();updateProgress();
 
 // Replay reveals each time content re-enters the viewport, in either direction.
 if("IntersectionObserver" in window){
-  const targets=[...document.querySelectorAll(".hero-masthead,.hero-copy,.spotlight,.metrics > div,.section-index,.institutions h2,.institution-rail-head,.institution-grid,.learning-section h2,.section-lead .note,.learning-area,#credentials h2,.library-filters,.catalogue-toolbar,.credential,.page-intro,.timeline-toolbar,.career-entry,.venture-card,.footer-inner")];
+  const targets=[...document.querySelectorAll(".credential,.learning-area,.institution-grid button,.career-card,.venture-card")];
   const visible=new Set();
   let observer=null,lastY=window.scrollY,direction=1;
   window.addEventListener("scroll",()=>{const y=window.scrollY;if(y!==lastY)direction=y>lastY?1:-1;lastY=y},{passive:true});
@@ -72,7 +74,7 @@ if("IntersectionObserver" in window){
       if(visible.has(el))continue;
       visible.add(el);
       if(motion.matches)continue;
-      el.style.setProperty("--reveal-y",direction>0?"26px":"-26px");
+      el.style.setProperty("--reveal-y","0px");
       el.classList.add("reveal-now");
     }
   }
