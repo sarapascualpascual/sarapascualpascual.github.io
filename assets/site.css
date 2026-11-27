@@ -103,3 +103,19 @@ header{padding-inline:max(20px,calc((100% - 1184px)/2));background:#faf8f5f7;bac
 @media(max-width:600px){header{padding-inline:16px}.portfolio-nav a{font-size:.69rem;padding:6px 5px}.hero{padding:16px;gap:16px;margin-top:12px;grid-template-columns:1fr}.hero .hero-masthead h1{font-size:clamp(1rem,5.5vw,2rem);margin:12px 0 15px}.hero-overline{gap:6px}.hero-overline .eyebrow{font-size:.54rem;letter-spacing:.07em}.edition-index{font-size:.62rem}.hero-copy{min-height:0}.hero .degree{font-size:1.42rem}.hero .lead{font-size:.83rem}.hero-actions{gap:10px}.hero-actions .cta,.quiet-link{font-size:.72rem}.spotlight{padding:12px 14px}.spot-card{min-height:140px;grid-template-columns:48px minmax(0,1fr);gap:5px 9px;padding:12px 0 8px}.spot-card .institution-mark{width:48px;height:48px}.spot-title{font-size:1.04rem}.spot-provider{font-size:.69rem}.spot-date,.spot-link{font-size:.74rem}.metrics{margin:12px 0 20px}.metrics div:nth-child(n){padding:12px 7px}.metrics strong{font-size:1.7rem}.metrics span{font-size:.66rem}.institutions,.learning-section,#credentials{padding:24px 0}.institution-grid button{flex-basis:140px;min-height:124px;grid-template-rows:56px minmax(30px,auto)}.institution-grid .institution-mark{width:56px;height:56px}.learning-area{padding:12px 6px;grid-template-columns:20px minmax(0,1fr) 28px 20px;gap:7px}.area-main{grid-template-columns:minmax(0,1fr);gap:6px}.area-meter{height:5px}.area-name{font-size:.82rem}.area-count{font-size:1rem}.page-intro{min-height:0;padding:22px}.page-intro h2{font-size:2rem}.career-entry{gap:5px;padding-bottom:12px}.career-card summary{gap:10px;padding:14px}.career-card .company-mark{flex-basis:56px;width:56px;height:48px}.role-title{font-size:.93rem}.venture-card{grid-template-columns:1fr}.venture-art{min-height:180px}.footer-inner{align-items:flex-start;flex-direction:column;gap:10px}}
 @media(max-width:340px){.hero .hero-masthead h1{font-size:5.1vw}.hero-overline .eyebrow{font-size:.49rem}.hero-actions{flex-direction:column;align-items:flex-start}}
 @media(prefers-reduced-motion:reduce){.learning-map.reveal-now .area-meter i,.reveal-now,.portfolio-panel.enter-view{animation:none!important}}
+
+/* Bidirectional scroll motion: repeat on every viewport entry. Content remains
+   readable without scripting, and the focus and reduced-motion paths are instant. */
+@keyframes scroll-reveal{
+  from{opacity:.18;translate:0 var(--reveal-y,26px)}
+  to{opacity:1;translate:0 0}
+}
+.reveal-now{animation:scroll-reveal .72s cubic-bezier(.16,1,.3,1) both;animation-delay:var(--reveal-delay,0ms)}
+.learning-map.reveal-now .learning-area:nth-child(2) .area-meter i{animation-delay:80ms}
+.learning-map.reveal-now .learning-area:nth-child(3) .area-meter i{animation-delay:160ms}
+.learning-map.reveal-now .learning-area:nth-child(4) .area-meter i{animation-delay:240ms}
+.learning-map.reveal-now .learning-area:nth-child(5) .area-meter i{animation-delay:320ms}
+.reveal-now:focus-within{animation:none;opacity:1;translate:none}
+@media(prefers-reduced-motion:reduce){
+  .reveal-now,.learning-map.reveal-now .area-meter i{animation:none!important;opacity:1;translate:none}
+}

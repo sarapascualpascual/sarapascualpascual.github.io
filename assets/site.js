@@ -56,5 +56,38 @@ function updateExpand(){const all=roles.every(x=>x.open);expand.dataset.en=all?"
 expand.hidden=false;expand.addEventListener("click",()=>{const open=!roles.every(x=>x.open);roles.forEach(x=>x.open=open);updateExpand()});for(const role of roles)role.addEventListener("toggle",updateExpand);updateExpand();
 let progressPending=false;function updateProgress(){progressPending=false;const max=document.documentElement.scrollHeight-window.innerHeight;const fraction=max>0?Math.max(0,Math.min(1,window.scrollY/max)):0;$("reading-fill").style.transform="scaleX("+fraction+")"}
 function queueProgress(){if(!progressPending){progressPending=true;requestAnimationFrame(updateProgress)}}window.addEventListener("scroll",queueProgress,{passive:true});window.addEventListener("resize",queueProgress);route();
-if("IntersectionObserver" in window&&!motion.matches){const reveal=new IntersectionObserver(entries=>{for(const e of entries)if(e.isIntersecting){e.target.classList.add("reveal-now");reveal.unobserve(e.target)}},{threshold:.08});for(const [i,e] of [...document.querySelectorAll(".metrics,.institutions,.learning-map,.credential,.career-entry,.page-intro,.venture-card")].entries()){e.style.setProperty("--reveal-delay",String((i%3)*55)+"ms");reveal.observe(e)}}
+
+// Replay reveals each time content re-enters the viewport, in either direction.
+if("IntersectionObserver" in window){
+  const targets=[...document.querySelectorAll(".hero-masthead,.hero-copy,.spotlight,.metrics > div,.section-index,.institutions h2,.institution-rail-head,.institution-grid,.learning-section h2,.section-lead .note,.learning-map,#credentials h2,.controls,.filterbar,.catalogue-toolbar,.credential,.page-intro,.timeline-toolbar,.career-entry,.venture-card,.footer-inner")];
+  const visible=new Set();
+  let observer=null,lastY=window.scrollY,direction=1;
+  window.addEventListener("scroll",()=>{const y=window.scrollY;if(y!==lastY)direction=y>lastY?1:-1;lastY=y},{passive:true});
+  function onReveal(entries){
+    for(const entry of entries){
+      const el=entry.target;
+      if(!entry.isIntersecting){
+        visible.delete(el);el.classList.remove("reveal-now");continue;
+      }
+      if(visible.has(el))continue;
+      visible.add(el);
+      if(motion.matches)continue;
+      el.style.setProperty("--reveal-y",direction>0?"26px":"-26px");
+      el.classList.add("reveal-now");
+    }
+  }
+  function configureReveals(){
+    if(observer)observer.disconnect();
+    visible.clear();
+    for(const el of targets)el.classList.remove("reveal-now");
+    if(motion.matches)return;
+    observer=new IntersectionObserver(onReveal,{threshold:0});
+    for(const [i,el] of targets.entries()){
+      el.style.setProperty("--reveal-delay",String((i%3)*45)+"ms");
+      observer.observe(el);
+    }
+  }
+  configureReveals();
+  motion.addEventListener?.("change",configureReveals);
+}
 })();
